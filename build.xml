@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<project name="SL2D" default="debug" basedir=".">
+    <!-- Loading machine dependency properties, e.g. FLEX_HOME -->
+    <property file="local.properties" />
+
+    <property name="BASE_DIR" value="/Users/aspirin/Workspace/fl2"/>
+    <property name="FLEX_HOME" value="${BASE_DIR}/4_5_0"/>
+    <property name="PIXEL_BENDER" value="${BASE_DIR}/pixelbender3d/bin/mac/pb3dutil.app/Contents/MacOS"/>
+    <property name="SWF_OBJECT" value="swfobject"/>
+    <taskdef resource="flexTasks.tasks" classpath="${FLEX_HOME}/ant/lib/flexTasks.jar"/>
+
+    <property name="so.template" value="${SWF_OBJECT}/template.html"/>
+    <property name="so.js" value="${SWF_OBJECT}/swfobject.js"/>
+
+    <property name="app.root" value="."/>
+    <property name="app.name" value="Text2Texture"/>
+
+    <property name="app.src" value="${app.root}/src"/>
+    <property name="app.libs" value="${app.root}/libs"/>
+    <property name="app.bin" value="${app.root}/bin"/>
+
+    <property name="app.width" value="800"/>
+    <property name="app.height" value="600"/>
+
+    <target name="compile" depends="clean">
+        <mxmlc file="${app.src}/${app.name}.as" output="${app.bin}/${app.name}.swf" 
+            default-background-color="0x000000" 
+            default-frame-rate="60"
+            actionscript-file-encoding="UTF-8"
+            static-link-runtime-shared-libraries="true" 
+            debug="true"
+            use-network="true"
+            incremental="true">
+
+            <!--<compiler.include-libraries dir="${app.libs}" append="true">
+                <include name="pb3dlib.swc"/>
+            </compiler.include-libraries>-->
+
+            <!-- include minimal comps -->
+            <compiler.source-path path-element="../blade2d-lib/minimalcomps/src"/>
+
+            <!-- include gpc lib -->
+            <compiler.source-path path-element="../blade3d-lib/away3d-core-fp11/src"/>
+
+            <!-- include poly2tri-as3 -->
+            <!-- <compiler.source-path path-element="../blade2d-lib/poly2tri-as3/src"/>-->
+
+            <!-- include glaze -->
+            <!-- <compiler.source-path path-element="../blade2d-lib/glaze/glaze-core/src"/>-->
+
+            <default-size width="${app.width}" height="${app.height}"/>
+        </mxmlc>
+    </target>
+
+    <target name="wrapper" depends="compile">
+        <copy file="${so.js}" tofile="${app.bin}/swfobject.js"/>
+        <copy file="${so.template}" tofile="${app.bin}/${app.name}.html">
+            <filterchain>
+                <replacetokens>
+                    <token key="project_name" value="${app.name}"/>
+                    <token key="name" value="${app.name}"/>
+                    <token key="width" value="${app.width}"/>
+                    <token key="height" value="${app.height}"/>
+                    <token key="flashvars" value="{}"/>
+                    <token key="attributes" value="{}"/>
+                    <token key="params" value="{wmode:'direct', allowFullScreen:'true'}"/>
+                </replacetokens>
+            </filterchain>
+        </copy>
+    </target>
+
+    <target name="debug" depends="wrapper">
+        <exec executable="open">
+            <arg line="-a Safari" />
+            <arg line="${app.bin}/${app.name}.html" />
+       </exec>
+    </target>
+
+    <target name="clean">
+        <delete>
+            <fileset dir="${app.bin}" includes="${app.name}.*" />
+        </delete>
+    </target>
+
+</project>
+
